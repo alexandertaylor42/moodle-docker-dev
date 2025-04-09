@@ -9,7 +9,8 @@ services:
     volumes:
       - ./moodle:/var/www/html
       - ./moodledata:/var/moodledata
-      - ./local:/var/www/html/local
+      - ./plugins/blocks/makeyourmark:/var/www/html/blocks/makeyourmark
+
     
 
     environment:
