@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   moodle:
@@ -6,10 +5,13 @@ services:
     container_name: moodle
     ports:
       - "8080:80"
+
     volumes:
       - ./moodle:/var/www/html
       - ./moodledata:/var/moodledata
-      - ./plugins:/var/www/html/local
+      - ./local:/var/www/html/local
+    
+
     environment:
       MOODLE_URL: http://localhost:8080
       MOODLE_DBTYPE: mysqli
