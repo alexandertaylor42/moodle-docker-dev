@@ -1,3 +1,11 @@
 moodle/
 moodledata/
-db/
+# Ignore ONLY the root-level db folder
+/db/        
+
+# Allow plugin block files
+!plugins/
+!plugins/blocks/
+!plugins/blocks/makeyourmark/
+!plugins/blocks/makeyourmark/**
+
