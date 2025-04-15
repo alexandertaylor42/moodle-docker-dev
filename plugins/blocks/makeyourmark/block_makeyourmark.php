@@ -14,6 +14,7 @@ class block_makeyourmark extends block_base {
 
         // Load the stylesheet for this block
         $PAGE->requires->css('/blocks/makeyourmark/styles.css');
+        $PAGE->requires->js_call_amd('block_makeyourmark/calendar', 'init');
 
         // Start calendar layout
         $this->content->text = html_writer::start_div('weekly-calendar');
