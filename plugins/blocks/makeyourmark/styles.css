@@ -37,3 +37,25 @@
     border-radius: 4px;
     font-size: 12px;
 }
+
+.makeyourmark-week {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.makeyourmark-day {
+    flex: 1;
+    min-width: 120px;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.makeyourmark-day ul {
+    padding-left: 15px;
+}
+
