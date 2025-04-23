@@ -59,3 +59,55 @@
     padding-left: 15px;
 }
 
+.makeyourmark-today {
+    border: 2px solid gold;
+    background-color: #1e1e1e;
+    box-shadow: 0 0 10px gold;
+    border-radius: 10px;
+    padding: 0.5em;
+}
+
+
+.makeyourmark-week {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    margin-top: 1em;
+}
+
+.makeyourmark-day {
+    flex: 1 1 120px;
+    background: #f8f9fa;
+    padding: 1em;
+    border-radius: 6px;
+    box-shadow: 0 0 4px rgba(0,0,0,0.1);
+}
+
+.makeyourmark-day ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.5em 0 0;
+}
+
+.makeyourmark-day li a {
+    font-weight: 500;
+    color: #0073aa;
+    text-decoration: none;
+}
+
+.makeyourmark-day li a:hover {
+    text-decoration: underline;
+}
+
+.event-time {
+    color: #666;
+    font-size: 0.85em;
+    margin-left: 0.25em;
+}
+
+.no-link {
+    font-size: 0.75em;
+    color: #aaa;
+    font-style: italic;
+}
+
