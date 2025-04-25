@@ -18,7 +18,7 @@
  * Make Your Mark block - Displays course events and custom events for students
  *
  * @package    block_makeyourmark
- * @copyright  2025 Your Institution
+ * @copyright  2025 Make Your Mark
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
