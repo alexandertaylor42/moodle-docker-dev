@@ -64,7 +64,7 @@ class block_makeyourmark extends block_base {
             null,
             20,
             null,
-            [$USER->id],
+            [],
         );
         
 
@@ -74,7 +74,7 @@ class block_makeyourmark extends block_base {
             $timestamp = $event->get_times()->get_start_time()->getTimestamp();
             $weekday = date('w', $timestamp);
 
-            $course = $event->get_course();
+            $course = $event->get_course();           
             if (!$course) {
                 $courseid = 0;
                 $course = (object)['id' => 0, 'fullname' => 'Unknown Course'];
