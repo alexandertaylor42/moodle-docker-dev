@@ -51,44 +51,72 @@ class block_makeyourmark extends block_base {
         $endofweek = strtotime('+6 days', $startofweek) + 86399;
 
         // Step 2: Get user's enrolled course IDs across all contexts
-        $courses = enrol_get_users_courses($USER->id, true, '*');
+        $courses = enrol_get_users_courses($USER->id, true, null, 'visible DESC, sortorder ASC');
         $courseids = array_keys($courses);
 
         // Step 3: Get events for the current user across those courses
-        $events = \core_calendar\local\api::get_events(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            20,
-            null,
-            [],
-        );
+        $events = [];
+        foreach ($courseids as $courseid) {
+            $courseevents = \core_calendar\local\api::get_events(
+                $startofweek,          // $timestartfrom
+                $endofweek,            // $timestartto
+                null,                  // $timesortfrom
+                null,                  // $timesortto
+                null,                  // $timestartaftereventid
+                null,                  // $timesortaftereventid
+                1000,                  // $limitnum (set high so you don't miss events)
+                null,                  // $type (no type filter)
+                [$USER->id],           // $usersfilter (array with 1 userid)
+                null,                  // $groupsfilter
+                [$courseid],           // $coursesfilter (array with 1 courseid)
+                null,                  // $categoriesfilter
+                true,                  // $withduration
+                true,                  // $ignorehidden
+                null                   // $filter
+            );
+
+            if (!empty($courseevents)) {
+                $events = array_merge($events, $courseevents);
+            }
+        }
         
 
         // Step 4: Group by day of week and then by course
         $weekdays = array_fill(0, 7, []);
         foreach ($events as $event) {
+
+            if (isset($event->eventtype) && $event->eventtype == 'user') {
+                continue;
+            }
+
             $timestamp = $event->get_times()->get_start_time()->getTimestamp();
             $weekday = date('w', $timestamp);
 
-            $course = $event->get_course();           
-            if (!$course) {
-                $courseid = 0;
-                $course = (object)['id' => 0, 'fullname' => 'Unknown Course'];
+            $course = null;
+            if (method_exists($event, 'get_course')) {
+                $course = $event->get_course();
+            }
+
+            if ($course && (method_exists($course, 'get') && $course->get('id') != 0)) {
+                $courseid = $course->get('id');
+                $fullname = $course->get('fullname');
+            } else if ($course && isset($course->id) && $course->id != 0) {
+                $courseid = $course->id;
+                $fullname = $course->fullname;
             } else {
-                $courseid = method_exists($course, 'get') ? $course->get('id') : $course->id;
-                $fullname = method_exists($course, 'get') ? $course->get('fullname') : $course->fullname;
-                $course = (object)['id' => $courseid, 'fullname' => $fullname];
+                $courseid = 0;
+                $fullname = 'Personal Event';
             }
 
             if (!isset($courses[$courseid])) {
-                $courses[$courseid] = $course;
+                $courses[$courseid] = (object)[
+                    'id' => $courseid,
+                    'fullname' => $fullname
+                ];
             }
 
             $weekdays[$weekday][$courseid][] = $event;
+
         }
 
         // Step 5: Render weekly output
@@ -104,7 +132,11 @@ class block_makeyourmark extends block_base {
                 $output .= "<li>No events yet</li>";
             } else {
                 foreach ($coursesByDay as $courseid => $events) {
-                    $coursename = format_string($courses[$courseid]->fullname);
+                    if (isset($courses[$courseid])) {
+                        $coursename = format_string($courses[$courseid]->fullname);
+                    } else {
+                        $coursename = 'Personal Event'; // or 'Custom Event'
+                    }                    
                     $output .= "<li><em>{$coursename}</em><ul>";
                     foreach ($events as $event) {
                         $name = format_string($event->get_name());
@@ -116,9 +148,12 @@ class block_makeyourmark extends block_base {
                             $url = $event->get_url();
                         } elseif (method_exists($event, 'get_action')) {
                             $action = $event->get_action();
-                            if (isset($action['url'])) {
-                                $url = $action['url'];
+                            if ($action && method_exists($action, 'get_url')) {
+                                $url = $action->get_url()->out();
+                            } else {
+                                $url = null;
                             }
+
                         }
 
                         if ($url) {
@@ -150,6 +185,10 @@ class block_makeyourmark extends block_base {
         // Make sure the calendar functions are available before attempting to call them
         if (function_exists('calendar_get_events')) {
             $userevents = calendar_get_events($startofweek, $endofweek, false, 0, $USER->id);
+
+            $userevents = array_filter($userevents, function($event) {
+                return ($event->eventtype === 'user');
+            });
         } else {
             $userevents = array(); // Initialize as empty if function not available
         }
