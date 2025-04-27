@@ -56,18 +56,15 @@ class block_makeyourmark extends block_base {
 
         // Step 3: Get events for the current user across those courses
         $events = \core_calendar\local\api::get_events(
-            $USER->id,
-            0,
-            0,
-            0,
-            $startofweek,
-            $endofweek,
-            true,
-            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            20,
+            null,
             [$USER->id],
-            [],
-            $courseids,
-            ['type' => 'action']
         );
         
 
