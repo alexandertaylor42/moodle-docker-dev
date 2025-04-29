@@ -34,7 +34,16 @@ class block_makeyourmark extends block_base {
     }
 
     public function get_content() {
-        global $USER, $OUTPUT, $PAGE, $CFG;
+        global $USER, $OUTPUT, $PAGE, $CFG, $DB;
+
+        // ——— Load “done” markers for this user ———
+        $doneRecords = $DB->get_records_menu(
+            'block_makeyourmark_done',
+            ['userid' => $USER->id],
+            '',
+            'eventid, timecompleted'
+        );
+        $doneIDs = array_keys($doneRecords);
 
         if ($this->content !== null) {
             return $this->content;
@@ -139,29 +148,54 @@ class block_makeyourmark extends block_base {
                     }                    
                     $output .= "<li><em>{$coursename}</em><ul>";
                     foreach ($events as $event) {
-                        $name = format_string($event->get_name());
-                        $time = userdate($event->get_times()->get_start_time()->getTimestamp(), '%I:%M %p');
-
-                        // Try to get a submission or content link
+                        // get the native event ID
+                        $eid   = $event->get_id();
+                        $name  = format_string($event->get_name());
+                        $time  = userdate($event->get_times()->get_start_time()->getTimestamp(), '%I:%M %p');
+                        $isDone = in_array($eid, $doneIDs);
+                    
+                        // build the main label (link or plain text)
+                        // — Determine the URL, falling back to get_action() if needed —
                         $url = null;
-                        if (method_exists($event, 'get_url')) {
-                            $url = $event->get_url();
+                        if (method_exists($event, 'get_url') && $event->get_url()) {
+                            $url = $event->get_url()->out();
                         } elseif (method_exists($event, 'get_action')) {
                             $action = $event->get_action();
                             if ($action && method_exists($action, 'get_url')) {
                                 $url = $action->get_url()->out();
-                            } else {
-                                $url = null;
                             }
-
                         }
 
-                        if ($url) {
-                            $output .= "<li><a href='{$url}'><strong>{$name}</strong> <span class='event-time'>($time)</span></a></li>";
+                        // — Build the label: link if not done and URL exists, else plain text —
+                        if (!$isDone && $url) {
+                            $label = "<a href='{$url}'><strong>{$name}</strong> <span class='event-time'>({$time})</span></a>";
                         } else {
-                            $output .= "<li>{$name} <span class='event-time'>($time)</span> <span class='no-link'>(no link)</span></li>";
+                            $label = "{$name} <span class='event-time'>({$time})</span>"
+                                . ($isDone ? '' : " <span class='no-link'>(no link)</span>");
                         }
+
+                    
+                        // apply a CSS class if completed
+                        $doneClass = $isDone ? ' makeyourmark-event-done' : '';
+                    
+                        // start the <li>
+                        $output .= "<li class='{$doneClass}'>{$label}";
+                    
+                        // if not done yet, render a “Done” form
+                        if (!$isDone) {
+                            $markurl = (new moodle_url('/blocks/makeyourmark/markdone.php'))->out();
+                            $output .= "
+                              <form method='post' action='{$markurl}' class='mark-done-form'>
+                                <input type='hidden' name='eventid' value='{$eid}' />
+                                <input type='submit' value='✔ Done' class='btn btn-link btn-sm mark-done-button' />
+                              </form>
+                            ";
+                        }
+                    
+                        // close the <li>
+                        $output .= "</li>";
                     }
+                    
                     $output .= "</ul></li>";
                 }
             }

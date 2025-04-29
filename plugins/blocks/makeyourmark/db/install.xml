@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="blocks/makeyourmark/db" VERSION="2025042900" COMMENT="Install table for completed assignments">
+  <TABLE NAME="block_makeyourmark_done" COMMENT="Stores completed calendar events by user">
+    <FIELD NAME="id"          TYPE="int"    LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="PK"/>
+    <FIELD NAME="userid"      TYPE="int"    LENGTH="10" NOTNULL="true" COMMENT="User who completed"/>
+    <FIELD NAME="eventid"     TYPE="int"    LENGTH="10" NOTNULL="true" COMMENT="Calendar event ID"/>
+    <FIELD NAME="timecompleted" TYPE="int"   LENGTH="10" NOTNULL="true" COMMENT="Timestamp"/>
+    <KEYS>
+      <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      <KEY NAME="userfk"   TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+    </KEYS>
+    <INDEXES>
+      <INDEX NAME="user_event" UNIQUE="true" FIELDS="userid,eventid"/>
+    </INDEXES>
+  </TABLE>
+</XMLDB>
