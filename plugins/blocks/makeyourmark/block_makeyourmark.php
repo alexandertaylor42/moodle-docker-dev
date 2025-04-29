@@ -180,20 +180,30 @@ class block_makeyourmark extends block_base {
                     
                         // start the <li>
                         $output .= "<li class='{$doneClass}'>{$label}";
-                    
-                        // if not done yet, render a “Done” form
+
                         if (!$isDone) {
+                            // — existing ✔ Done form —
                             $markurl = (new moodle_url('/blocks/makeyourmark/markdone.php'))->out();
                             $output .= "
-                              <form method='post' action='{$markurl}' class='mark-done-form'>
+                            <form method='post' action='{$markurl}' class='mark-done-form'>
                                 <input type='hidden' name='eventid' value='{$eid}' />
                                 <input type='submit' value='✔ Done' class='btn btn-link btn-sm mark-done-button' />
-                              </form>
+                            </form>
+                            ";
+                        } else {
+                            // — new ↺ Undo form for already‐done items —
+                            $unmarkurl = (new moodle_url('/blocks/makeyourmark/markundone.php'))->out();
+                            $output .= "
+                            <form method='post' action='{$unmarkurl}' class='unmark-done-form'>
+                                <input type='hidden' name='eventid' value='{$eid}' />
+                                <input type='submit' value='↺ Undo' class='btn btn-link btn-sm unmark-done-button' />
+                            </form>
                             ";
                         }
-                    
+
                         // close the <li>
                         $output .= "</li>";
+
                     }
                     
                     $output .= "</ul></li>";
