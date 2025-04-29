@@ -88,15 +88,25 @@ class block_makeyourmark extends block_base {
                 $events = array_merge($events, $courseevents);
             }
         }
-        
 
+        // — Remove any duplicate event objects by their native ID —
+        $unique = [];
+        foreach ($events as $evt) {
+            $unique[$evt->get_id()] = $evt;
+        }
+        $events = array_values($unique);
+
+        
         // Step 4: Group by day of week and then by course
         $weekdays = array_fill(0, 7, []);
         foreach ($events as $event) {
 
-            if (isset($event->eventtype) && $event->eventtype == 'user') {
-                continue;
+            // skip any user‐created event here—only show course events in the week grid
+            if (method_exists($event, 'get_eventtype')
+            && $event->get_eventtype() === 'user') {
+            continue;
             }
+
 
             $timestamp = $event->get_times()->get_start_time()->getTimestamp();
             $weekday = date('w', $timestamp);
